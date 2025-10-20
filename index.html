@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arvex VIP - منصة الاستثمار الذكية</title>
+    
+    <link rel="stylesheet" href="styles.css"> 
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <div id="login-register-overlay">
+        <div class="form-container" id="login-form">
+            <div class="form-box">
+                <h2 class="text-3xl font-black text-gray-800 mb-6">تسجيل الدخول 👋</h2>
+                <input id="login-email" type="email" placeholder="البريد الإلكتروني" value="test@example.com" /> 
+                <input id="login-password" type="password" placeholder="كلمة المرور" value="123456" />
+                <button id="login-btn">دخول</button>
+                <div class="switch-link" id="show-register">ليس لديك حساب؟ <span class="text-yellow-600 font-bold">سجل الآن</span></div>
+            </div>
+        </div>
+
+        <div class="form-container hidden-form" id="register-form">
+            <div class="form-box">
+                <h2 class="text-3xl font-black text-gray-800 mb-6">إنشاء حساب جديد ✨</h2>
+                <input id="register-email" type="email" placeholder="البريد الإلكتروني" />
+                <input id="register-phone" type="tel" placeholder="رقم الهاتف (مطلوب)" />
+                <input id="register-password" type="password" placeholder="كلمة المرور (6 أحرف على الأقل)" />
+                <input id="register-password-confirm" type="password" placeholder="تأكيد كلمة المرور" />
+                <input id="register-referral" type="text" placeholder="كود الإحالة (اختياري)" />
+                <button id="register-btn">سجل الآن</button>
+                <div class="switch-link" id="show-login">لديك حساب؟ <span class="text-yellow-600 font-bold">سجل الدخول</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="settings" class="tab-content active">
+        <div class="relative h-48 rounded-xl overflow-hidden shadow-lg mb-6" style="background: url('https://i.postimg.cc/65smMhQY/IMG-20250820-154947-706.jpg') no-repeat center center/cover;">
+            <div class="absolute inset-0 bg-black/50"></div>
+            <div class="absolute top-4 right-4 text-white">
+                <h2 class="text-2xl font-black">مرحباً بك، <span id="home-username"></span></h2>
+                <p class="text-sm">ابدأ الاستثمار الذكي اليوم!</p>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 flex justify-around p-3 bg-white/20 backdrop-blur-sm">
+                 <div class="text-center text-white">
+                    <div class="text-lg font-extrabold" id="main-devices-count">0</div>
+                    <div class="text-xs">جهاز/أجهزة</div>
+                </div>
+                 <div class="text-center text-white">
+                    <div class="text-lg font-extrabold" id="main-total-revenue">0.00 ج.م</div>
+                    <div class="text-xs">إجمالي الدخل</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-3 mb-6">
+            <a href="javascript:void(0)" onclick="oldSimulateDeposit()" class="bg-white p-3 rounded-xl text-center shadow-md hover:bg-yellow-50 transition">
+                <i data-lucide="arrow-down-to-line" class="w-6 h-6 mx-auto text-green-600"></i>
+                <span class="text-xs font-semibold mt-1 block">إيداع (محاكاة)</span>
+            </a>
+            <a href="javascript:void(0)" onclick="oldSimulateWithdraw()" class="bg-white p-3 rounded-xl text-center shadow-md hover:bg-yellow-50 transition">
+                <i data-lucide="arrow-up-from-line" class="w-6 h-6 mx-auto text-red-600"></i>
+                <span class="text-xs font-semibold mt-1 block">سحب (محاكاة)</span>
+            </a>
+            <a href="https://t.me/Arvex3_vib" target="_blank" class="bg-white p-3 rounded-xl text-center shadow-md hover:bg-yellow-50 transition">
+                <i data-lucide="headset" class="w-6 h-6 mx-auto text-blue-600"></i>
+                <span class="text-xs font-semibold mt-1 block">دعم فني</span>
+            </a>
+            <a href="javascript:void(0)" onclick="showTab('bonus', document.getElementById('nav-bonus'))" class="bg-white p-3 rounded-xl text-center shadow-md hover:bg-yellow-50 transition">
+                <i data-lucide="gift" class="w-6 h-6 mx-auto text-yellow-600"></i>
+                <span class="text-xs font-semibold mt-1 block">مكافآت</span>
+            </a>
+        </div>
+
+        <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2 border-gray-200">فرص الاستثمار المميزة</h3>
+        <div class="grid grid-cols-1 gap-4" id="home-products-container">
+        </div>
+        <img src="https://i.postimg.cc/tRkQLVbG/Screenshot-Chrome.jpg" alt="إعلان" class="w-full rounded-xl mt-6 shadow-md">
+    </div>
+
+    <div id="shop" class="tab-content">
+        <h2 class="text-2xl font-black text-gray-800 mb-6 border-b pb-3 border-yellow-500">🛍️ متجر استثمارات Arvex</h2>
+
+        <div class="flex justify-around items-center mb-6 p-4 bg-white rounded-xl shadow-md border border-gray-200">
+            <div class="text-center">
+                <i data-lucide="car" class="w-8 h-8 mx-auto text-yellow-600 mb-1"></i>
+                <span class="block text-xl font-black" id="shop-my-devices-count">0</span>
+                <span class="text-sm text-gray-500">أجهزتي</span>
+            </div>
+            <div class="h-12 w-[1px] bg-gray-300"></div>
+             <div class="text-center">
+                <i data-lucide="trending-up" class="w-8 h-8 mx-auto text-green-600 mb-1"></i>
+                <span class="block text-xl font-black" id="shop-total-revenue">0.00 ج.م</span>
+                <span class="text-sm text-gray-500">إجمالي الإيرادات</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="products-grid">
+        </div>
+    </div>
+
+    <div id="my-products" class="tab-content">
+        <h2 class="text-2xl font-black text-gray-800 mb-6 border-b pb-3 border-green-600">✅ منتجاتي قيد التشغيل</h2>
+
+        <div class="bg-white p-4 rounded-xl shadow-md mb-4 text-center">
+            <h3 class="text-lg font-bold">الإجمالي المتبقي من الأرباح اليومية</h3>
+            <p class="text-3xl font-black text-green-600 mt-1" id="total-daily-earn">0.00 ج.م</p>
+        </div>
+
+        <button onclick="collectAllRevenue()" class="w-full bg-yellow-500 text-black font-bold py-3 rounded-xl hover:bg-yellow-600 transition duration-200 mb-6 text-lg shadow-md">
+            جمع الأرباح المتاحة بالكامل 💰
+        </button>
+
+        <div id="my-products-list">
+            <p class="text-center text-gray-500 text-lg mt-8 p-4 bg-yellow-50 rounded-xl" id="no-products-message">
+                ليس لديك منتجات قيد التشغيل حالياً.<br>
+                بعد الشراء، سيظهر المنتج هنا وينزل لك الربح كل 24 ساعة.
+            </p>
+        </div>
+    </div>
+
+    <div id="ont" class="tab-content">
+        <div class="profile-header h-52 rounded-xl mb-20 relative overflow-hidden shadow-lg" style="background: url('https://i.postimg.cc/g2cV7mdF/IMG-20250818-195329-336.jpg') no-repeat center center/cover;">
+            <div class="absolute inset-0 bg-black/30"></div>
+            <div class="absolute bottom-[-30px] left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-white/50 w-[90%] sm:w-[400px]">
+                <img src="https://i.postimg.cc/638zmwr5/IMG-20250818-195101-086.jpg" alt="صورة الحساب" class="w-16 h-16 rounded-full border-4 border-yellow-400">
+                <div>
+                    <h2 class="text-xl font-black text-gray-800" id="account-name-display"></h2>
+                    <p class="text-sm font-semibold text-gray-600">رصيدك: <span id="account-balance" class="text-yellow-600 font-bold">0.00</span> ج.م</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-container" id="settings-menu-main">
+            <div class="menu-item" onclick="showTab('my-products', document.getElementById('nav-my-products'))">
+                <div class="menu-text text-lg"><i class="fas fa-car"></i> منتجاتي قيد التشغيل</div>
+                <span class="arrow text-2xl">›</span>
+            </div>
+            <div class="menu-item" onclick="showAccountSection('records')">
+                <div class="menu-text text-lg"><i class="fas fa-list-alt"></i> سجلات الإيداع والسحب</div>
+                <span class="arrow text-2xl">›</span>
+             </div>
+             <div class="menu-item" onclick="showAccountSection('change-password')">
+                <div class="menu-text text-lg"><i class="fas fa-key"></i> تغيير كلمة السر</div>
+                <span class="arrow text-2xl">›</span>
+            </div>
+            <div class="menu-item" onclick="showAccountSection('gift-code')">
+                <div class="menu-text text-lg"><i class="fas fa-share-alt"></i> كود الإحالة الخاص بي</div>
+                <span class="arrow text-2xl">›</span>
+            </div>
+            <div class="menu-item" onclick="window.open('https://t.me/Arvex3_vib', '_blank')">
+                <div class="menu-text text-lg"><i class="fas fa-headset"></i> خدمة العملاء والتليجرام</div>
+                <span class="arrow text-2xl">›</span>
+            </div>
+            <div class="menu-item" onclick="userLogout()" style="border-color: #fca5a5;">
+                <div class="menu-text text-lg text-red-600 font-bold" style="gap:15px;"><i class="fas fa-right-from-bracket text-red-500"></i> تسجيل الخروج</div>
+                <span class="arrow text-2xl text-red-500">›</span>
+            </div>
+        </div>
+        
+         <div id="change-password" class="setting-section hidden p-4 mt-4 bg-white rounded-xl shadow-lg border border-gray-200">
+            <h3 class="text-2xl font-black text-gray-800 mb-4 text-center">🔐 تغيير كلمة السر</h3>
+            <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <input id="old-password" type="password" placeholder="كلمة السر القديمة" class="w-full mb-3" />
+                <input id="new-password" type="password" placeholder="كلمة السر الجديدة" class="w-full mb-3" />
+                <input id="confirm-new-password" type="password" placeholder="تأكيد كلمة السر الجديدة" class="w-full mb-4" />
+                <button onclick="changePassword()" class="w-full bg-yellow-500 text-black font-bold py-3 rounded-full hover:bg-yellow-600 transition duration-200">
+                    تغيير كلمة السر
+                </button>
+            </div>
+        </div>
+        <div id="gift-code" class="setting-section hidden p-4 mt-4 bg-white rounded-xl shadow-lg border border-gray-200">
+            <h3 class="text-2xl font-black text-gray-800 mb-4 text-center">🎁 رمز الإحالة الخاص بي</h3>
+            <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <p class="text-center text-gray-600 mb-3">شارك الرمز مع أصدقائك لتحصل على مكافآت!</p>
+                <div class="flex gap-2 items-center mb-4">
+                    <div class="flex-1 h-12 flex items-center border-2 border-yellow-500 rounded-xl px-4 bg-white">
+                        <input id="my-referral-code" value="LOADING..." readonly class="border-0 outline-none w-full bg-transparent text-lg font-bold text-center">
+                    </div>
+                    <button class="h-12 px-5 border-0 rounded-xl bg-yellow-500 text-black font-bold text-sm shadow-md transition hover:bg-yellow-600"
+                        onclick="copyReferralCode()">
+                        نسخ
+                    </button>
+                </div>
+                <div class="text-sm text-gray-700 space-y-2">
+                    <p class="font-bold text-green-600">✅ العمولة: 35% على المستوى الأول!</p>
+                    <p>📌 سيتم إضافة مكافأة الإحالة إلى رصيدك فور استثمار صديقك.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="records" class="setting-section hidden p-4 mt-4 bg-white rounded-xl shadow-lg border border-gray-200">
+            <h3 class="text-2xl font-black text-gray-800 mb-4 text-center">📜 سجلات العمليات</h3>
+            <div id="transaction-records" class="space-y-2">
+            </div>
+            <p class="text-gray-500 text-lg p-8 text-center" id="no-records-message">لا توجد سجلات حاليًا.</p>
+        </div>
+
+        <div id="back-button-account" class="hidden text-center mt-6">
+            <button onclick="backToAccountMenu()" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-full transition duration-200 shadow-md">
+                ← العودة للقائمة
+            </button>
+        </div>
+    </div>
+
+    <div id="team" class="tab-content">
+        <h2 class="text-2xl font-black text-gray-800 mb-6 text-center">👥 نظام الإحالة والأرباح</h2>
+
+        <div class="card p-4 rounded-xl shadow-lg bg-white mb-6 border-b-4 border-yellow-500">
+            <div class="text-center">
+                <div class="text-sm text-gray-500">كود الإحالة الخاص بك</div>
+                <div class="text-3xl font-black text-yellow-600 mt-1" id="team-referral-code">LOADING...</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="p-4 bg-blue-500 text-white rounded-xl text-center shadow-md">
+                <div class="text-sm">عدد الأشخاص</div>
+                <div class="text-2xl font-black mt-1" id="team-members">0</div>
+            </div>
+            <div class="p-4 bg-green-500 text-white rounded-xl text-center shadow-md">
+                <div class="text-sm">إجمالي إيرادات الفريق</div>
+                <div class="text-2xl font-black mt-1" id="team-revenue">0.00 ج.م</div>
+            </div>
+        </div>
+        
+         <button onclick="showAccountSection('team-details')" class="w-full bg-indigo-500 text-white font-bold py-3 rounded-xl hover:bg-indigo-600 transition duration-200 mb-6 text-lg shadow-md">
+            عرض تفاصيل الفريق 🚀
+        </button>
+
+        <h3 class="text-xl font-bold text-gray-800 mt-6 mb-4 border-b pb-2">عمولة المستويات</h3>
+
+        <div class="bg-white p-4 rounded-xl shadow-md space-y-3">
+             <div class="flex justify-between items-center border-b pb-2">
+                 <div class="text-lg font-bold">المستوى الأول</div>
+                 <div class="text-xl font-black text-yellow-600">35%</div>
+             </div>
+             <div class="flex justify-between items-center border-b pb-2">
+                 <div class="text-lg font-bold">المستوى الثاني</div>
+                 <div class="text-xl font-black text-green-600">2%</div>
+             </div>
+             <div class="flex justify-between items-center">
+                 <div class="text-lg font-bold">المستوى الثالث</div>
+                 <div class="text-xl font-black text-red-600">1%</div>
+             </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3 text-center">ستحصل على المكافآت فوراً عند استثمار أي شخص في فريقك.</p>
+    </div>
+    
+    <div id="team-details" class="setting-section hidden tab-content p-4">
+        <h2 class="text-2xl font-black text-gray-800 mb-6 text-center">📋 تفاصيل الفريق</h2>
+        <div class="menu-container p-0">
+            <div class="menu-item bg-blue-100" onclick="displayTeamLevel(1)">
+                <div class="menu-text"><i class="fas fa-users text-blue-600"></i> المستوى الأول <span id="level-1-count" class="font-bold text-lg"></span></div>
+                <span class="arrow text-2xl">›</span>
+            </div>
+            <div class="menu-item bg-green-100" onclick="displayTeamLevel(2)">
+                <div class="menu-text"><i class="fas fa-user-plus text-green-600"></i> المستوى الثاني <span id="level-2-count" class="font-bold text-lg"></span></div>
+                <span class="arrow text-2xl">›</span>
+            </div>
+            <div class="menu-item bg-red-100" onclick="displayTeamLevel(3)">
+                <div class="menu-text"><i class="fas fa-user text-red-600"></i> المستوى الثالث <span id="level-3-count" class="font-bold text-lg"></span></div>
+                <span class="arrow text-2xl">›</span>
+            </div>
+        </div>
+        
+        <h3 class="text-xl font-bold text-gray-800 mt-6 mb-4 border-b pb-2" id="level-detail-header">الرجاء اختيار مستوى للعرض</h3>
+
+        <div id="team-members-list" class="space-y-4">
+            <p class="text-center text-gray-500 text-lg mt-8 p-4 bg-yellow-50 rounded-xl" id="no-team-message">
+                لم يتم تسجيل أي أعضاء في هذا المستوى حتى الآن.
+            </p>
+        </div>
+        
+         <div class="hidden text-center mt-6" id="back-to-team-btn">
+            <button onclick="backToTeamMenu()" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-full transition duration-200 shadow-md">
+                ← العودة لقائمة المستويات
+            </button>
+        </div>
+
+    </div>
+
+    <div id="bonus" class="tab-content">
+        <h2 class="text-2xl font-black text-yellow-600 mb-6 text-center">⭐ المكافآت والجوائز اليومية</h2>
+
+        <div class="bg-white p-5 rounded-xl shadow-lg mb-6 border-b-4 border-green-500">
+            <h3 class="text-xl font-bold mb-3 flex items-center gap-2"><i data-lucide="calendar-check" class="w-6 h-6 text-green-600"></i> تسجيل الحضور اليومي</h3>
+            <p class="text-gray-700 mb-4">سجل حضورك اليومي واكسب 5 ج.م يتم إضافتها لرصيدك بشكل تلقائي.</p>
+            <button onclick="claimDaily()" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition duration-200 shadow-md">
+                تسجيل الحضور اليومي
+            </button>
+            <p class="text-sm text-center text-gray-500 mt-2" id="daily-status">الرجاء تسجيل الدخول أولاً.</p>
+        </div>
+        
+        <div class="bg-white p-5 rounded-xl shadow-lg mb-6 border-b-4 border-yellow-500">
+            <h3 class="text-xl font-bold mb-3 flex items-center gap-2"><i data-lucide="rabbit" class="w-6 h-6 text-yellow-600"></i> عجلة الحظ</h3>
+            <p class="text-gray-700 mb-4">جرب حظك يوميًا واربح جوائز وعروض فورية! 🍀</p>
+            
+            <div class="text-center mb-4">
+                <span class="text-xl font-black text-yellow-600" id="wheel-spins-count">0</span>
+                <span class="text-md font-semibold text-gray-700"> لفّة متاحة</span>
+            </div>
+            
+            <button onclick="spinWheel()" id="spin-btn" class="w-full bg-yellow-500 text-black font-bold py-3 rounded-xl hover:bg-yellow-600 transition duration-200 shadow-md disabled:bg-gray-300 disabled:text-gray-500 cursor-pointer">
+                تدوير العجلة الآن
+            </button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="tab-content">
+        <h2 class="text-2xl font-black text-red-600 mb-6 border-b pb-3 border-red-500">لوحة الإدارة 🚨</h2>
+        
+        <div class="bg-white p-4 rounded-xl shadow-lg mb-6">
+            <h3 class="text-xl font-bold mb-3">سجلات المعاملات المعلقة</h3>
+            <div id="admin-transactions-list" class="space-y-3">
+                <p class="text-center text-gray-500">الرجاء تسجيل الدخول كإدمن</p>
+            </div>
+        </div>
+    </div>
+    
+    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-gray-200 px-3 py-2 flex justify-around items-center text-xs font-semibold text-gray-700 z-50 rounded-t-2xl bottom-nav">
+        <button id="nav-settings" onclick="showTab('settings', this)" class="flex flex-col items-center gap-1 active-tab">
+            <div class="icon-bg w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100">
+                <i data-lucide="home" class="w-6 h-6"></i>
+            </div>
+            <span>الرئيسية</span>
+        </button>
+        <button id="nav-shop" onclick="showTab('shop', this)" class="flex flex-col items-center gap-1">
+            <div class="icon-bg w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+                <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+            </div>
+            <span>المتجر</span>
+        </button>
+         <button id="nav-my-products" onclick="showTab('my-products', this)" class="flex flex-col items-center gap-1">
+            <div class="icon-bg w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+                <i data-lucide="layers" class="w-6 h-6"></i>
+            </div>
+            <span>منتجاتي</span>
+        </button>
+        <button id="nav-ont" onclick="showTab('ont', this)" class="flex flex-col items-center gap-1">
+            <div class="icon-bg w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+                <i data-lucide="user" class="w-6 h-6"></i>
+            </div>
+            <span>حسابي</span>
+        </button>
+        <button id="nav-team" onclick="showTab('team', this)" class="flex flex-col items-center gap-1">
+            <div class="icon-bg w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+                <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <span>فريقي</span>
+        </button>
+         <button id="nav-admin" onclick="showTab('admin-panel', this)" class="hidden flex flex-col items-center gap-1">
+            <div class="icon-bg w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+                <i data-lucide="settings" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <span class="text-red-600 font-bold">الإدارة</span>
+        </button>
+    </nav>
+    
+    <div id="fancy-toast">
+        <span style="font-size: 20px;">⚠️</span>
+        <span id="fancy-toast-text">نص الإشعار</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

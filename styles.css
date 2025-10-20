@@ -1,0 +1,105 @@
+/* تنسيق الأقسام الرئيسية */
+.tab-content { display: none; padding: 16px; padding-bottom: 80px; animation: fadeIn 0.5s ease-out; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* شريط التنقل السفلي */
+.bottom-nav button { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: #6b7280; user-select: none; }
+.bottom-nav button.active-tab { color: #facc15; transform: scale(1.05); }
+.bottom-nav button.active-tab .icon-bg { 
+    background-color: #fef08a; 
+    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
+}
+
+/* بطاقة المنتج */
+.product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); }
+
+/* نافذة تسجيل الدخول */
+#login-register-overlay {
+    position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 99999 !important;
+    background-color: rgba(247, 247, 247, 0.95); 
+}
+.form-box { background: white; border-radius: 35px; padding: 30px 25px; width: 400px; max-width: 90vw; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; z-index: 1; }
+.form-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 20px; font-size: 16px; box-sizing: border-box; transition: border-color 0.3s; }
+.form-box input:focus { border-color: #facc15; outline: none; }
+.form-box button { width: 100%; background-color: #facc15; padding: 12px; font-weight: bold; font-size: 16px; border: none; border-radius: 9999px; cursor: pointer; transition: background 0.3s, transform 0.2s; }
+.form-box button:hover { background-color: #eab308; transform: translateY(-2px); }
+.switch-link { margin-top: 15px; color: #ca8a04; font-weight: bold; cursor: pointer; transition: color 0.3s; }
+.form-container.hidden-form { display: none !important; }
+
+/* ستايل الإشعار الأنيق (Fancy Toast) */
+#fancy-toast {
+    position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background-color: #ff3b30; color: white;
+    padding: 14px 24px; border-radius: 20px; font-size: 16px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    opacity: 0; z-index: 99999; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; align-items: center; gap: 10px;
+}
+
+/* ستايل قائمة "حسابي" */
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
+    padding: 20px 0;
+    max-width: 500px;
+    margin: auto;
+    direction: rtl;
+}
+.menu-item {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 18px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+.menu-item:hover {
+    background-color: #fefcf5;
+    transform: translateX(-3px);
+    border-color: #facc15;
+    box-shadow: 0 8px 20px rgba(250, 204, 21, 0.1);
+}
+.menu-text {
+    display: flex;
+    align-items: center;
+    font-size: 17px;
+    font-weight: 600;
+    color: #222;
+    gap: 12px;
+}
+.menu-text i {
+    font-size: 20px;
+    color: #eab308; 
+}
+.arrow {
+    font-size: 20px;
+    color: #facc15;
+    font-weight: bold;
+}
+
+/* بطاقة المنتج الخاص بي */
+.my-product-card {
+    background-color: #fff;
+    border-right: 6px solid #facc15;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 15px;
+}
+.my-product-card .progress-bar {
+    height: 10px;
+    background-color: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+.my-product-card .progress {
+    height: 100%;
+    background-color: #facc15;
+    transition: width 0.5s ease;
+}
