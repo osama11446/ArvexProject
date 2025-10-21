@@ -6,6 +6,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors'); 
+const path = require('path'); // ✅ إضافة جديدة: لاستخدام مسارات الملفات
 
 const app = express();
 // Railway ستحدد البورت تلقائيًا، لكن نستخدم 3000 للتطوير المحلي
@@ -22,266 +23,239 @@ app.use(cors());
 app.use(bodyParser.json()); 
 
 // **********************************************
+// 🌟🌟🌟 إضافة جديدة لخدمة الملفات الثابتة 🌟🌟🌟
+// **********************************************
+
+// هذا السطر يخبر Express بأن يعرض الملفات الثابتة (مثل app.js و styles.css) 
+// الموجودة في نفس المجلد الذي يوجد به server.js
+app.use(express.static(path.join(__dirname, '')));
+
+// هذا السطر يوجه طلب المسار الأساسي (/) ليعرض ملف index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// **********************************************
 // 2. بيانات المنتجات
 // **********************************************
 const productsData = [
-    { id: 1, name: "Arvex 1", cost: 105.00, durationDays: 60, dailyEarning: 35.00, img: "img/product1.png" },
-    { id: 2, name: "Arvex 2", cost: 205.00, durationDays: 60, dailyEarning: 70.00, img: "img/product2.png" },
-    { id: 3, name: "Arvex 3", cost: 405.00, durationDays: 60, dailyEarning: 150.00, img: "img/product3.png" },
-    { id: 4, name: "Arvex 4", cost: 1000.00, durationDays: 60, dailyEarning: 320.00, img: "img/product4.png" },
-    { id: 5, name: "Arvex 5", cost: 2000.00, durationDays: 60, dailyEarning: 750.00, img: "img/product5.png" },
+    { id: 1, name: "Arvex 1", cost: 105.00, durationDays: 60, dailyEarning: 35.00, img: "https://i.postimg.cc/CxL870Z/health-and-safety.jpg" },
+    { id: 2, name: "Arvex 2", cost: 205.00, durationDays: 60, dailyEarning: 70.00, img: "https://i.postimg.cc/SRCPg88G/diversity-saped.jpg" },
+    { id: 3, name: "Arvex 3", cost: 405.00, durationDays: 60, dailyEarning: 150.00, img: "https://i.postimg.cc/Zn2QcHCn/q3-earnings-web.jpg" },
+    { id: 4, name: "Arvex 4", cost: 1000.00, durationDays: 60, dailyEarning: 320.00, img: "https://i.postimg.cc/mD8X0q9j/a25e6ffc-6d80-4963-a212-e5c70e4e5971.jpg" },
+    { id: 5, name: "Arvex 5", cost: 2500.00, durationDays: 60, dailyEarning: 900.00, img: "https://i.postimg.cc/L4hF1v8g/business-growth.jpg" },
+    { id: 6, name: "Arvex 6", cost: 5000.00, durationDays: 60, dailyEarning: 2000.00, img: "https://i.postimg.cc/QtxK54R8/47a2e7c4-0699-4d9f-9721-c426a8d8174f.jpg" }
 ];
 
 
 // **********************************************
-// 3. قاعدة بيانات مؤقتة (في الذاكرة - In-Memory DB)
+// 3. قاعدة البيانات الوهمية (Mock Database)
 // **********************************************
-// تُستخدم للاختبار والنموذج الأولي. سيتم مسحها عند إيقاف تشغيل السيرفر.
-let users = {
-    "test@example.com": {
-        password: "123", 
-        uid: "user-12345", 
-        email: "test@example.com",
-        phone: "01012345678",
-        balance: 500.00,
-        referralCode: "ARVEX1",
-        referredBy: null,
-        isAdmin: true, 
-        lastClaimTime: 0, 
-        wheelSpins: 3, 
-        myProducts: [
-             { instanceId: 101, productId: 1, name: "Arvex 1", cost: 105.00, dailyEarning: 35.00, durationDays: 60, purchasedAt: Date.now() - (3 * 24 * 60 * 60 * 1000), lastRevenueCollection: Date.now() - (2 * 24 * 60 * 60 * 1000), totalRevenueCollected: 70.00 },
-        ],
-        transactions: [
-            { type: "إيداع", name: "رصيد ابتدائي", amount: 500.00, date: new Date().toLocaleString(), isRevenue: false, status: 'completed' },
-        ],
-        team: [] 
+const mockDB = {
+    users: {
+        'test-uid-12345': {
+            uid: 'test-uid-12345',
+            name: 'تجريبي',
+            email: 'test@example.com',
+            phone: '01000000000',
+            password: '123', // يتم استخدامها للتسجيل فقط في هذا الـ mock
+            balance: 500.00,
+            totalDeposit: 100.00,
+            totalEarnings: 25.00,
+            activeInvestments: [
+                { id: 101, productId: 1, cost: 105, dailyEarning: 35.00, startDate: new Date('2024-01-01').toLocaleString(), endDate: new Date('2024-03-01').toLocaleString() }
+            ],
+            transactions: [
+                { type: "إيداع", name: "إيداع أولي", amount: 100.00, date: new Date('2024-01-01').toLocaleString(), isRevenue: true, status: 'completed' },
+                { type: "استثمار", name: "استثمار Arvex 1", amount: -105.00, date: new Date('2024-01-01').toLocaleString(), isRevenue: false, status: 'completed' },
+                { type: "ربح", name: "ربح يومي", amount: 35.00, date: new Date('2024-01-02').toLocaleString(), isRevenue: true, status: 'completed' }
+            ]
+        }
     }
 };
 
 // **********************************************
-// 4. دالة حماية الـ API (Middleware)
+// 4. وظائف المساعدة والمصادقة (Auth & Helpers)
 // **********************************************
-const authMiddleware = (req, res, next) => {
+
+// محاكاة لإنشاء JWT (توكن بسيط)
+function generateToken(uid) {
+    return `mock-token-${uid}-${Date.now()}`;
+}
+
+// Middleware للتحقق من التوكن
+function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        return res.status(403).json({ success: false, message: 'مطلوب رمز توثيق (Token).' });
-    }
-
-    const token = authHeader.split(' ')[1]; 
-    if (!token || !token.startsWith("fake-jwt-token-for-")) {
-        return res.status(401).json({ success: false, message: 'رمز توثيق غير صالح.' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ success: false, message: 'مطلوب رمز مصادقة (Token is missing).' });
     }
     
-    const uid = token.replace("fake-jwt-token-for-", "");
-    const user = users[uid];
+    // محاكاة للتحقق من التوكن واستخراج الـ UID
+    const token = authHeader.split(' ')[1];
+    const uid = token.split('-')[2]; // استخراج الـ UID من التوكن الوهمي
+
+    const user = Object.values(mockDB.users).find(u => u.uid === uid);
+    
     if (!user) {
-        return res.status(404).json({ success: false, message: 'المستخدم غير موجود.' });
+        return res.status(401).json({ success: false, message: 'رمز مصادقة غير صالح.' });
     }
-
-    req.user = user; 
-    req.uid = uid; 
     
+    req.user = user;
     next();
-};
+}
 
 
 // **********************************************
-// 5. نقاط النهاية (API Endpoints)
+// 5. مسارات الـ API (Routes)
 // **********************************************
 
-// 5.1. تسجيل حساب جديد
-app.post('/api/register', (req, res) => {
-    const { email, phone, password, referral } = req.body;
-
-    if (users[email]) {
-        return res.status(409).json({ success: false, message: 'هذا البريد الإلكتروني مسجل بالفعل.' });
+// 5.1. مسار التسجيل
+app.post('/api/auth/register', (req, res) => {
+    const { name, email, password, phone } = req.body;
+    
+    if (!name || !email || !password) {
+        return res.status(400).json({ success: false, message: 'يرجى ملء جميع الحقول المطلوبة.' });
     }
-    // ... باقي منطق التسجيل ...
-
-    const newUID = `user-${Date.now()}`;
-    const newReferralCode = newUID.toUpperCase().substring(5, 11);
-    const initialBalance = 10.00;
-
+    
+    // التحقق من وجود المستخدم بالفعل
+    if (Object.values(mockDB.users).some(user => user.email === email)) {
+        return res.status(409).json({ success: false, message: 'هذا البريد الإلكتروني مستخدم بالفعل.' });
+    }
+    
+    // إنشاء UID عشوائي بسيط
+    const newUid = `user-${Date.now()}`;
+    
     const newUser = {
-        password: password,
-        uid: newUID,
-        email: email,
-        phone: phone,
-        balance: initialBalance,
-        referralCode: newReferralCode,
-        referredBy: referral || null,
-        isAdmin: false,
-        myProducts: [],
+        uid: newUid,
+        name,
+        email,
+        phone,
+        password, // ملاحظة: في بيئة حقيقية يجب أن تكون مشفرة
+        balance: 0.00,
+        totalDeposit: 0.00,
+        totalEarnings: 0.00,
+        activeInvestments: [],
         transactions: [
-             { type: "مكافأة", name: "هدية التسجيل", amount: initialBalance, date: new Date().toLocaleString(), isRevenue: true, status: 'completed' },
-        ],
-        team: [],
-        lastClaimTime: 0,
-        wheelSpins: 0,
+            { type: "تسجيل", name: "حساب جديد", amount: 0.00, date: new Date().toLocaleString(), isRevenue: true, status: 'completed' }
+        ]
     };
 
-    users[email] = newUser;
+    mockDB.users[newUid] = newUser;
+    
+    const token = generateToken(newUid);
 
-    res.json({ 
+    res.status(201).json({ 
         success: true, 
-        message: 'تم إنشاء الحساب بنجاح.'
+        message: 'تم إنشاء الحساب بنجاح.', 
+        user: newUser,
+        token 
     });
 });
 
 
-// 5.2. تسجيل الدخول
-app.post('/api/login', (req, res) => {
+// 5.2. مسار تسجيل الدخول
+app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
+    
+    const user = Object.values(mockDB.users).find(
+        u => u.email === email && u.password === password
+    );
 
-    const user = users[email];
-
-    if (!user || user.password !== password) {
-        return res.status(401).json({ success: false, message: 'البريد أو كلمة المرور غير صحيحة.' });
+    if (!user) {
+        return res.status(401).json({ success: false, message: 'بيانات الاعتماد غير صحيحة.' });
     }
 
-    const fakeToken = "fake-jwt-token-for-" + email; 
-
+    const token = generateToken(user.uid);
+    
     res.json({ 
         success: true, 
-        message: 'تم تسجيل الدخول بنجاح!',
-        user: { uid: user.uid, phone: user.phone, email: user.email },
-        token: fakeToken 
+        message: 'تم تسجيل الدخول بنجاح.', 
+        user,
+        token 
     });
 });
 
+// 5.3. مسار جلب بيانات المستخدم
+app.get('/api/users/:uid', authMiddleware, (req, res) => {
+    // تم جلب بيانات المستخدم بالفعل من الـ Middleware
+    res.json({ 
+        success: true, 
+        user: req.user
+    });
+});
 
-// 5.3. جلب بيانات المستخدم
-app.get('/api/user/data', authMiddleware, (req, res) => {
+// 5.4. مسار شراء منتج (استثمار)
+app.post('/api/transactions/invest', authMiddleware, (req, res) => {
+    const { productId } = req.body; 
     const user = req.user; 
-    // حذف كلمة المرور قبل الإرسال
-    const { password, ...userData } = user;
     
-    // إرجاع البيانات المطلوبة للواجهة الأمامية
-    res.json({
-        success: true,
-        data: userData
-    });
-});
+    const product = productsData.find(p => p.id === productId);
 
-// 5.4. شراء منتج
-app.post('/api/products/buy', authMiddleware, (req, res) => {
-    const { productId } = req.body;
-    const user = req.user; 
-
-    const productToBuy = productsData.find(p => p.id === productId);
-
-    if (!productToBuy) {
+    if (!product) {
         return res.status(404).json({ success: false, message: 'المنتج غير موجود.' });
     }
-
-    if (user.balance < productToBuy.cost) {
-        return res.status(402).json({ success: false, message: 'رصيدك الحالي غير كافٍ لشراء هذا المنتج.' });
+    
+    if (user.balance < product.cost) {
+        return res.status(402).json({ success: false, message: 'رصيدك غير كافٍ لشراء هذا المنتج.' });
     }
+    
+    user.balance -= product.cost;
 
-    // خصم الرصيد
-    user.balance -= productToBuy.cost;
+    // إضافة الاستثمار النشط
+    user.activeInvestments.push({
+        id: Date.now(),
+        productId: product.id,
+        cost: product.cost,
+        dailyEarning: product.dailyEarning,
+        startDate: new Date().toLocaleString(),
+        durationDays: product.durationDays
+    });
 
-    // تسجيل المعاملة
+    // إضافة معاملة الاستثمار
     user.transactions.push({
-        type: "شراء منتج",
-        name: productToBuy.name,
-        amount: -productToBuy.cost,
+        type: "استثمار",
+        name: `استثمار ${product.name}`,
+        amount: -product.cost,
         date: new Date().toLocaleString(),
         isRevenue: false,
         status: 'completed'
     });
-
-    // إضافة المنتج للمستخدم
-    const newProductInstance = {
-        instanceId: Date.now() + Math.random(), 
-        productId: productToBuy.id,
-        name: productToBuy.name,
-        cost: productToBuy.cost,
-        durationDays: productToBuy.durationDays,
-        dailyEarning: productToBuy.dailyEarning,
-        purchasedAt: Date.now(), 
-        lastRevenueCollection: Date.now(), 
-        totalRevenueCollected: 0.00
-    };
-    user.myProducts.push(newProductInstance);
-
-    res.json({ 
-        success: true, 
-        message: `✅ تم شراء منتج ${productToBuy.name} بنجاح!`,
-        newBalance: user.balance,
-        myProducts: user.myProducts,
-        transactions: user.transactions
-    });
-});
-
-// 5.5. جمع الأرباح المتاحة
-const oneDay = 86400000; // 24 ساعة بالمللي ثانية
-app.post('/api/products/collect', authMiddleware, (req, res) => {
-    const user = req.user; 
-    let totalCollectedAmount = 0;
-    const now = Date.now();
     
-    // منطق جمع الأرباح (كما شرحناه سابقاً)
-    user.myProducts.forEach(product => {
-        const lastCollectionTime = product.lastRevenueCollection || product.purchasedAt;
-        // 🚨 هنا للـ **اختبار السريع** سنعتبر الدورة 10 ثواني (10000 مللي ثانية)
-        // قم بتغيير 'oneDay' إلى '10000' للاختبار السريع، ثم أعدها لـ 'oneDay' قبل النشر
-        const availableCycles = Math.floor((now - lastCollectionTime) / oneDay); // استخدم oneDay للنشر الحقيقي
-        
-        if (availableCycles >= 1) {
-            const amountToCollect = availableCycles * product.dailyEarning;
-            user.balance += amountToCollect;
-            totalCollectedAmount += amountToCollect;
-            product.lastRevenueCollection = now;
-            product.totalRevenueCollected += amountToCollect;
-
-            if (amountToCollect > 0) {
-                 user.transactions.push({
-                    type: "أرباح يومية",
-                    name: product.name,
-                    amount: amountToCollect,
-                    date: new Date().toLocaleString(),
-                    isRevenue: true,
-                    status: 'completed'
-                });
-            }
-        }
-    });
-
-    if (totalCollectedAmount === 0) {
-        return res.json({ 
-            success: false, 
-            message: 'لا توجد أرباح متاحة للجمع حالياً.'
-        });
-    }
-
     res.json({ 
         success: true, 
-        message: `✅ تم جمع إجمالي: ${totalCollectedAmount.toFixed(2)} ج.م`,
+        message: `✅ تم الاستثمار في ${product.name} بنجاح!`,
         newBalance: user.balance,
-        myProducts: user.myProducts,
-        transactions: user.transactions
+        transactions: user.transactions,
+        activeInvestments: user.activeInvestments 
     });
 });
+
+// 5.5. مسار جلب بيانات الاستثمارات النشطة
+app.get('/api/investments', authMiddleware, (req, res) => {
+    res.json({ 
+        success: true, 
+        investments: req.user.activeInvestments
+    });
+});
+
 
 // 5.6. طلب الإيداع (Mocked)
 app.post('/api/transactions/deposit', authMiddleware, (req, res) => {
-    const { amount, method } = req.body;
+    const { amount } = req.body; 
     const user = req.user; 
-    
+
     if (typeof amount !== 'number' || amount <= 0) {
-        return res.status(400).json({ success: false, message: 'المبلغ غير صالح.' });
+        return res.status(400).json({ success: false, message: 'الرجاء إدخال مبلغ صحيح.' });
     }
     
     user.balance += amount;
-
+    
     user.transactions.push({
         type: "إيداع",
-        name: `إيداع آلي عبر ${method}`,
+        name: `إيداع عبر فودافون كاش`,
         amount: amount,
         date: new Date().toLocaleString(),
-        isRevenue: false,
+        isRevenue: true,
         status: 'completed'
     });
 
@@ -332,8 +306,5 @@ app.post('/api/transactions/withdraw', authMiddleware, (req, res) => {
 // **********************************************
 
 app.listen(PORT, () => {
-    console.log(`\n=================================================`);
-    console.log(`✅ السيرفر شغال دلوقتي على البورت: ${PORT}`);
-    console.log(`🔑 مستخدم تجريبي: test@example.com / 123`);
-    console.log(`=================================================`);
+    console.log(`Server running on port ${PORT}`);
 });
