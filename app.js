@@ -5,484 +5,391 @@
 
 // متغيرات عامة
 let currentUser = null; 
-const BASE_API_URL = 'http://localhost:3000/api'; // 🚨 هذا هو رابط السيرفر الخلفي في Termux 🚨
+// ✅✅✅ تم تحديث رابط السيرفر إلى رابط Railway العام ✅✅✅
+const BASE_API_URL = 'https://arvexproject-production.up.railway.app/api'; 
 
 // بيانات المنتجات (تبقى في الأمامي للعرض)
 const productsData = [
     { id: 1, name: "Arvex 1", cost: 105.00, durationDays: 60, dailyEarning: 35.00, img: "https://i.postimg.cc/CxL870Z/health-and-safety.jpg" },
     { id: 2, name: "Arvex 2", cost: 205.00, durationDays: 60, dailyEarning: 70.00, img: "https://i.postimg.cc/SRCPg88G/diversity-saped.jpg" },
     { id: 3, name: "Arvex 3", cost: 405.00, durationDays: 60, dailyEarning: 150.00, img: "https://i.postimg.cc/Zn2QcHCn/q3-earnings-web.jpg" },
-    { id: 4, name: "Arvex 4", cost: 1000.00, durationDays: 60, dailyEarning: 320.00, img: "https://i.postimg.cc/NjpzCQyZ/2016c1163-1-1-mjk-207.jpg" },
-    { id: 5, name: "Arvex 5", cost: 2000.00, durationDays: 60, dailyEarning: 750.00, img: "https://i.postimg.cc/R0SBgLD7/01-hero-img-circulareconomy.webp" },
+    { id: 4, name: "Arvex 4", cost: 1000.00, durationDays: 60, dailyEarning: 320.00, img: "https://i.postimg.cc/mD8X0q9j/a25e6ffc-6d80-4963-a212-e5c70e4e5971.jpg" },
+    { id: 5, name: "Arvex 5", cost: 2500.00, durationDays: 60, dailyEarning: 900.00, img: "https://i.postimg.cc/L4hF1v8g/business-growth.jpg" },
+    { id: 6, name: "Arvex 6", cost: 5000.00, durationDays: 60, dailyEarning: 2000.00, img: "https://i.postimg.cc/QtxK54R8/47a2e7c4-0699-4d9f-9721-c426a8d8174f.jpg" }
 ];
 
-// ******************** 1. وظائف واجهة المستخدم العامة ********************
-        
-function showTab(tabId, buttonElement = null) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
 
-    // إخفاء أقسام "حسابي" الفرعية عند الانتقال لتبويب آخر
-    if (tabId !== 'ont' && tabId !== 'team-details') {
-        document.getElementById("settings-menu-main").classList.remove('hidden');
-        document.getElementById("back-button-account").classList.add('hidden');
-        document.getElementById("back-to-team-btn").classList.add('hidden');
-        document.querySelectorAll('.setting-section').forEach(el => el.classList.add('hidden'));
-    }
+// ******************************************************
+// 1. وظائف المساعدة (Helpers)
+// ******************************************************
+
+// دالة عامة لإظهار الرسائل (بديل لـ alert)
+function showMessage(msg, type = 'success') {
+    const msgBox = document.getElementById('message-box');
+    const msgText = document.getElementById('message-text');
+    msgText.textContent = msg;
     
-    // 🚨 تفعيل جلب بيانات الإدمن عند الحاجة (سيتم برمجته لاحقاً)
-    if (tabId === 'admin-panel' && currentUser && currentUser.isAdmin) {
-         // adminFetchTransactions(); 
-    }
-
-    document.querySelectorAll('.bottom-nav button').forEach(btn => {
-        btn.classList.remove('active-tab');
-        btn.querySelector('.icon-bg').classList.remove('bg-yellow-100');
-        btn.querySelector('.icon-bg').classList.add('bg-gray-100');
-    });
-
-    const activeBtn = buttonElement || document.getElementById(`nav-${tabId}`);
-    if (activeBtn) {
-        activeBtn.classList.add('active-tab');
-        activeBtn.querySelector('.icon-bg').classList.remove('bg-gray-100');
-        activeBtn.querySelector('.icon-bg').classList.add('bg-yellow-100');
-    }
-    window.scrollTo(0, 0);
-}
-
-function showFancyToast(message, type = 'error') {
-    const toast = document.getElementById('fancy-toast');
-    const text = document.getElementById('fancy-toast-text');
-    text.textContent = message;
-
-    toast.style.backgroundColor = type === 'success' ? '#10b981' : (type === 'info' ? '#3b82f6' : '#ff3b30');
+    // إزالة جميع ألوان الخلفية المحتملة
+    msgBox.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500');
     
-    toast.style.top = '30px';
-    toast.style.opacity = '1';
+    // تعيين اللون المناسب
+    if (type === 'success') {
+        msgBox.classList.add('bg-green-500');
+    } else if (type === 'error') {
+        msgBox.classList.add('bg-red-500');
+    } else {
+        msgBox.classList.add('bg-yellow-500');
+    }
+
+    msgBox.classList.remove('hidden', 'opacity-0', 'translate-y-full');
+    msgBox.classList.add('opacity-100', 'translate-y-0');
 
     setTimeout(() => {
-        toast.style.top = '-100px';
-        toast.style.opacity = '0';
-    }, 3000);
+        msgBox.classList.remove('opacity-100', 'translate-y-0');
+        msgBox.classList.add('opacity-0', 'translate-y-full');
+        setTimeout(() => {
+             msgBox.classList.add('hidden');
+        }, 300); // انتظر حتى ينتهي التحريك ليصبح مخفيًا
+    }, 4000);
 }
 
-function formatCurrency(amount) {
-    // تنسيق العملة مع فاصل الآلاف
-    return `${parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} ج.م`;
-}
-
-// دالة التحكم في أقسام صفحة "حسابي"
-function showAccountSection(id) {
-    if (id !== 'team-details') {
-        document.getElementById("settings-menu-main").classList.add('hidden');
-        document.getElementById("back-button-account").classList.remove('hidden');
-    } 
+// دالة لجلب البيانات من السيرفر
+async function fetchAPI(endpoint, method = 'GET', data = null) {
+    const url = `${BASE_API_URL}${endpoint}`;
+    const headers = { 'Content-Type': 'application/json' };
     
-    if (id === 'team-details') {
-         showTab('team-details', document.getElementById('nav-team'));
-         document.getElementById("back-to-team-btn").classList.add('hidden');
-    } else {
-        document.querySelectorAll('.setting-section').forEach(el => el.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    }
-}
-
-function backToAccountMenu() {
-    document.getElementById("settings-menu-main").classList.remove('hidden');
-    document.getElementById("back-button-account").classList.add('hidden');
-    document.querySelectorAll('.setting-section').forEach(el => el.classList.add('hidden'));
-}
-
-
-// ******************** 2. منطق تسجيل الدخول والتسجيل (استدعاء API) ********************
-        
-function generateReferralCode(length = 6) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}
-        
-// 🚨 هذه الدالة تم تعديلها لاستدعاء السيرفر الخلفي بدلاً من Firebase 🚨
-async function userRegister() {
-    const email = document.getElementById('register-email').value;
-    const phone = document.getElementById('register-phone').value;
-    const pass = document.getElementById('register-password').value;
-    const passConfirm = document.getElementById('register-password-confirm').value;
-    const referral = document.getElementById('register-referral').value.toUpperCase();
-
-    if (!email || !phone || pass.length < 6 || pass !== passConfirm) {
-         return showFancyToast('يرجى ملء جميع الحقول بشكل صحيح. كلمة السر يجب أن تكون 6 أحرف على الأقل، والبريد وتأكيده متطابقين.');
-    }
-    if (phone.length < 8) {
-         return showFancyToast('يجب أن لا يقل رقم الهاتف عن 8 أرقام.');
+    const token = localStorage.getItem('userToken');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
     }
 
+    const config = {
+        method: method,
+        headers: headers,
+        // لا نرسل body مع طلبات GET
+        body: data ? JSON.stringify(data) : null, 
+    };
+    
     try {
-        const response = await fetch(`${BASE_API_URL}/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                email: email, 
-                phone: phone, 
-                password: pass, 
-                referral: referral,
-                // نرسل كود إحالة مبدئي، لكن السيرفر هو من سيتحقق ويخزنه
-                initialReferralCode: generateReferralCode() 
-            })
-        });
-        
+        const response = await fetch(url, config);
         const result = await response.json();
-
-        if (result.success) {
-            showFancyToast('✅ تم تسجيل الحساب بنجاح! رصيدك الآن 10.00 ج.م', 'success');
-             // العودة إلى شاشة تسجيل الدخول
-            document.getElementById('register-form').classList.add('hidden-form');
-            document.getElementById('login-form').classList.remove('hidden-form');
+        
+        if (response.ok) {
+            return { success: true, data: result };
         } else {
-            showFancyToast(`❌ خطأ في التسجيل: ${result.message}`);
+            // معالجة الأخطاء من السيرفر (مثل 401 Unauthorized)
+            if (response.status === 401) {
+                userLogout();
+                showMessage('انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى.', 'error');
+            }
+            return { success: false, message: result.message || 'حدث خطأ غير معروف.' };
         }
-
     } catch (error) {
-        console.error("Registration Error:", error);
-        showFancyToast(`❌ خطأ في الاتصال بالسيرفر: ${error.message}`); 
+        console.error('API Fetch Error:', error);
+        showMessage('فشل الاتصال بالسيرفر. تأكد من أن السيرفر يعمل.', 'error');
+        return { success: false, message: 'فشل في الاتصال بالسيرفر.' };
     }
 }
 
-// 🚨 هذه الدالة تم تعديلها لاستدعاء السيرفر الخلفي بدلاً من Firebase 🚨
+// دالة تحديث حالة الواجهة (بعد تسجيل الدخول/الخروج)
+function updateUI() {
+    const isLoggedIn = currentUser !== null;
+    document.getElementById('login-register-overlay').style.display = isLoggedIn ? 'none' : 'flex';
+    document.getElementById('main-app-container').classList.toggle('hidden', !isLoggedIn);
+    
+    if (isLoggedIn) {
+        // تحديث جميع بيانات المستخدم في الواجهة
+        document.getElementById('user-balance').textContent = parseFloat(currentUser.balance).toFixed(2);
+        document.getElementById('user-name-profile').textContent = currentUser.name || 'مستخدم جديد';
+        document.getElementById('user-id').textContent = currentUser.uid;
+        document.getElementById('user-total-earnings').textContent = parseFloat(currentUser.totalEarnings).toFixed(2);
+        document.getElementById('user-total-deposit').textContent = parseFloat(currentUser.totalDeposit).toFixed(2);
+        
+        // تحديث جدول المعاملات
+        updateTransactionsTable(currentUser.transactions);
+
+        // إظهار زر لوحة التحكم للمشرف فقط (بناءً على UID ثابت)
+        const isAdmin = currentUser.uid === 'admin-uid-12345';
+        document.getElementById('nav-admin').classList.toggle('hidden', !isAdmin);
+
+    } else {
+        // إذا كان المستخدم غير مسجل دخول، قم بإظهار علامة التبويب "الرئيسية" الافتراضية
+        showTab('home', document.getElementById('nav-home'));
+    }
+    
+    // إعادة تهيئة أيقونات lucide بعد تحديث الـ DOM
+    lucide.createIcons();
+}
+
+// دالة لجلب بيانات المستخدم بعد تسجيل الدخول أو عند تحميل الصفحة
+async function fetchUserData(uid) {
+    const response = await fetchAPI(`/users/${uid}`, 'GET');
+
+    if (response.success) {
+        currentUser = response.data.user;
+        updateUI();
+        showMessage('تم تحميل بياناتك بنجاح.');
+    } else {
+        showMessage(response.message || 'فشل تحميل بيانات المستخدم.', 'error');
+        userLogout();
+    }
+}
+
+
+// ******************************************************
+// 2. وظائف المصادقة (Auth Functions)
+// ******************************************************
+
 async function userLogin() {
     const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-password').value;
+    const password = document.getElementById('login-password').value;
 
-    if (!email || pass.length < 6) {
-         return showFancyToast('يرجى إدخال البريد وكلمة المرور بشكل صحيح.');
-    }
+    const response = await fetchAPI('/auth/login', 'POST', { email, password });
 
-    try {
-        const response = await fetch(`${BASE_API_URL}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, password: pass })
-        });
-        
-        const result = await response.json();
-
-        if (result.success) {
-            // تخزين بيانات المستخدم والتوكن (للاستخدام في الطلبات اللاحقة)
-            // نستخدم localStorage لتخزين حالة الجلسة
-            localStorage.setItem('userToken', result.token); 
-            localStorage.setItem('userUID', result.user.uid);
-            
-            // استدعاء جلب البيانات بعد النجاح (لبناء كائن currentUser)
-            await fetchUserData(result.user.uid);
-            loginSuccess(); 
-        } else {
-            showFancyToast(`❌ خطأ في تسجيل الدخول: ${result.message}`); 
-        }
-
-    } catch (error) {
-        console.error("Login Error:", error);
-        showFancyToast(`❌ خطأ في الاتصال بالسيرفر: ${error.message}`); 
+    if (response.success) {
+        const { user, token } = response.data;
+        localStorage.setItem('userUID', user.uid);
+        localStorage.setItem('userToken', token);
+        currentUser = user;
+        updateUI();
+        showMessage(`مرحبًا بعودتك يا ${user.name}!`);
+    } else {
+        showMessage(response.message || 'فشل تسجيل الدخول. تأكد من البيانات.', 'error');
     }
 }
 
-/**
- * جلب بيانات المستخدم من السيرفر.
- * @param {string} uid - معرّف المستخدم.
- */
-// 🚨 هذه الدالة تم تعديلها لاستدعاء السيرفر الخلفي بدلاً من Firestore 🚨
-async function fetchUserData(uid) {
-     const token = localStorage.getItem('userToken');
-     if (!token) return;
+async function userRegister() {
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const phone = document.getElementById('register-phone').value;
 
-     try {
-        // نستخدم GET بـ Query Parameter لإرسال الـ UID 
-        const response = await fetch(`${BASE_API_URL}/user/data?uid=${uid}`, { 
-             headers: { 
-                 'Authorization': `Bearer ${token}` 
-             }
-        });
-        
-        const result = await response.json();
+    const response = await fetchAPI('/auth/register', 'POST', { name, email, password, phone });
 
-        if (result.success) {
-            // تهيئة الكائن العام للمستخدم
-            currentUser = { 
-                id: uid, 
-                ...result.data, 
-                // يجب أن تكون هذه البيانات موجودة في الـ result.data
-                myProducts: result.data.myProducts || [], 
-                transactions: result.data.transactions || [],
-                isAdmin: result.data.isAdmin || false,
-                lastClaimTime: result.data.lastClaimTime || 0,
-                wheelSpins: result.data.wheelSpins || 0,
-                team: result.data.team || [],
-            };
-            
-            return true;
-        } else {
-            console.error("Error fetching user data:", result.message);
-             // في حالة فشل التوكن أو الجلب، نسجل خروج
-            userLogout();
-            return false;
-        }
-    } catch (error) {
-        console.error("Error fetching user data:", error);
-        userLogout();
-        return false;
+    if (response.success) {
+        const { user, token } = response.data;
+        localStorage.setItem('userUID', user.uid);
+        localStorage.setItem('userToken', token);
+        currentUser = user;
+        updateUI();
+        showMessage('✅ تم التسجيل بنجاح! مرحباً بك.');
+    } else {
+        showMessage(response.message || 'فشل التسجيل. ربما البريد الإلكتروني مستخدم بالفعل.', 'error');
     }
 }
 
-
-function loginSuccess() {
-    document.getElementById('login-register-overlay').style.display = 'none';
-    updateUI(); 
-    showTab('settings');
-}
-        
 function userLogout() {
-    localStorage.removeItem('userToken');
     localStorage.removeItem('userUID');
+    localStorage.removeItem('userToken');
     currentUser = null;
-    document.getElementById('login-register-overlay').style.display = 'flex';
-    showFancyToast('تم تسجيل الخروج بنجاح!', 'info');
-    updateUI(); // لتصفير الواجهة
-} 
-
-
-// ******************** 3. منطق الشراء وتحديث الأرباح (كلها تحتاج تحديث إلى API) ********************
-
-// 🚨 جميع هذه الدوال ستحتاج إلى إرسال طلب (POST/GET) إلى السيرفر الخلفي (BASE_API_URL) 🚨
-
-// تم ترك الدوال كما هي حالياً، لكنها سترسل رسالة "يرجى تسجيل الدخول" حتى يتم تحديثها.
-
-async function buyProduct(productId) {
-    if (!currentUser) return showFancyToast('يرجى تسجيل الدخول أولاً لإتمام عملية الشراء.');
-    // 🚨 استدعاء: POST ${BASE_API_URL}/products/buy
-    showFancyToast('⚠️ هذه الدالة تحتاج للتحديث لاستدعاء سيرفرك الخاص.');
+    updateUI();
+    showMessage('تم تسجيل الخروج بنجاح.');
 }
 
-function collectAllRevenue() {
-    if (!currentUser) return showFancyToast('يرجى تسجيل الدخول أولاً.');
-    // 🚨 استدعاء: POST ${BASE_API_URL}/products/collect
-    showFancyToast('⚠️ هذه الدالة تحتاج للتحديث لاستدعاء سيرفرك الخاص.');
-}
+// ******************************************************
+// 3. وظائف التعامل مع المنتجات والمعاملات
+// ******************************************************
 
-function claimDaily() {
-    if (!currentUser) return showFancyToast('يرجى تسجيل الدخول أولاً.');
-    // 🚨 استدعاء: POST ${BASE_API_URL}/bonus/claim
-    showFancyToast('⚠️ هذه الدالة تحتاج للتحديث لاستدعاء سيرفرك الخاص.');
-}
+async function userInvest(productId) {
+    if (!currentUser) return showMessage('الرجاء تسجيل الدخول أولاً.', 'error');
 
-function spinWheel() {
-    if (!currentUser) return showFancyToast('يرجى تسجيل الدخول أولاً.');
-    // 🚨 استدعاء: POST ${BASE_API_URL}/bonus/spin
-    showFancyToast('⚠️ هذه الدالة تحتاج للتحديث لاستدعاء سيرفرك الخاص.');
-}
+    const product = productsData.find(p => p.id === productId);
+    if (!product) return showMessage('المنتج غير موجود.', 'error');
 
-async function changePassword() {
-    if (!currentUser) return showFancyToast('يرجى تسجيل الدخول أولاً.');
-    // 🚨 استدعاء: POST ${BASE_API_URL}/user/change-password
-    showFancyToast('⚠️ هذه الدالة تحتاج للتحديث لاستدعاء سيرفرك الخاص.');
-}
+    const response = await fetchAPI('/transactions/invest', 'POST', { productId });
 
-function oldSimulateDeposit() {
-    if (!currentUser) return showFancyToast('يرجى تسجيل الدخول أولاً.');
-    // 🚨 استدعاء: POST ${BASE_API_URL}/transaction/deposit-request
-    showFancyToast('⚠️ هذه الدالة تحتاج للتحديث لاستدعاء سيرفرك الخاص.');
-}
-
-function oldSimulateWithdraw() {
-    if (!currentUser) return showFancyToast('يرجى تسجيل الدخول أولاً.');
-    // 🚨 استدعاء: POST ${BASE_API_URL}/transaction/withdraw-request
-    showFancyToast('⚠️ هذه الدالة تحتاج للتحديث لاستدعاء سيرفرك الخاص.');
+    if (response.success) {
+        currentUser.balance = response.data.newBalance;
+        currentUser.transactions = response.data.transactions;
+        currentUser.activeInvestments = response.data.activeInvestments; 
+        updateUI();
+        showMessage(response.message);
+    } else {
+        showMessage(response.message, 'error');
+    }
 }
 
 
-// ******************** 4. وظائف تحديث الواجهة (UI) ********************
-        
-function updateUI() {
-    if (!currentUser) {
-        // حالة عدم تسجيل الدخول
-        document.getElementById('account-balance').textContent = formatCurrency(0);
-        document.getElementById('account-name-display').textContent = 'زائر';
-        document.getElementById('home-username').textContent = 'زائر';
-        // إخفاء زر الإدمن
-        document.getElementById('nav-admin').classList.add('hidden');
+async function submitDeposit() {
+    if (!currentUser) return showMessage('الرجاء تسجيل الدخول أولاً.', 'error');
+    const amount = parseFloat(document.getElementById('deposit-amount').value);
+
+    if (isNaN(amount) || amount <= 0) {
+        return showMessage('الرجاء إدخال مبلغ صحيح.', 'error');
+    }
+    
+    // إخفاء نافذة الإيداع
+    closeModal('deposit-modal');
+
+    const response = await fetchAPI('/transactions/deposit', 'POST', { amount });
+
+    if (response.success) {
+        currentUser.balance = response.data.newBalance;
+        currentUser.transactions = response.data.transactions;
+        currentUser.totalDeposit = (currentUser.totalDeposit || 0) + amount; // تحديث إجمالي الإيداعات
+        updateUI();
+        showMessage(response.message);
+    } else {
+        showMessage(response.message, 'error');
+    }
+}
+
+
+async function submitWithdraw() {
+    if (!currentUser) return showMessage('الرجاء تسجيل الدخول أولاً.', 'error');
+    const amount = parseFloat(document.getElementById('withdraw-amount').value);
+    const method = document.getElementById('withdraw-method').value;
+    const destination = document.getElementById('withdraw-destination').value;
+
+    if (isNaN(amount) || amount <= 50) {
+        return showMessage('الحد الأدنى للسحب هو 50 ج.م.', 'error');
+    }
+    
+    // إخفاء نافذة السحب
+    closeModal('withdraw-modal');
+
+    const response = await fetchAPI('/transactions/withdraw', 'POST', { amount, method, destination });
+
+    if (response.success) {
+        currentUser.balance = response.data.newBalance;
+        currentUser.transactions = response.data.transactions;
+        updateUI();
+        showMessage(response.message);
+    } else {
+        showMessage(response.message, 'error');
+    }
+}
+
+
+// ******************************************************
+// 4. وظائف تحديث الواجهة والـ DOM
+// ******************************************************
+
+function updateTransactionsTable(transactions) {
+    const tableBody = document.getElementById('transactions-table-body');
+    tableBody.innerHTML = ''; // تفريغ الجدول
+
+    if (!transactions || transactions.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">لا توجد معاملات مسجلة بعد.</td></tr>';
         return;
     }
-    
-    // حساب إجمالي الدخل
-    const grandTotalRevenue = (currentUser.transactions || []).filter(t => t.isRevenue).reduce((sum, t) => sum + t.amount, 0);
 
-    // تحديث الرصيد والأسماء 
-    document.getElementById('account-balance').textContent = formatCurrency(currentUser.balance);
-    document.getElementById('account-name-display').textContent = currentUser.phone || currentUser.id;
-    document.getElementById('home-username').textContent = currentUser.phone || currentUser.id;
-    
-    // تحديث كود الإحالة
-    document.getElementById('my-referral-code').value = currentUser.referralCode || 'N/A';
-    document.getElementById('team-referral-code').textContent = currentUser.referralCode || 'N/A';
+    // عرض آخر 5 معاملات فقط
+    const latestTransactions = transactions.slice(-5).reverse();
 
-    // تحديث سجلات المعاملات
-    updateTransactionsUI();
-    
-    // تحديث المنتجات الخاصة بي
-    updateMyProductsUI();
-    
-    // تحديث الإحصائيات (الرئيسية والمتجر)
-    const activeProductsCount = (currentUser.myProducts || []).length;
-    const totalRevenueFromProducts = (currentUser.myProducts || []).reduce((sum, p) => sum + (p.totalRevenueCollected || 0), 0);
+    latestTransactions.forEach(tx => {
+        const amountClass = tx.isRevenue ? 'text-green-600 font-bold' : 'text-red-600 font-bold';
+        const sign = tx.amount > 0 ? '+' : '';
+        const statusText = tx.status === 'completed' ? 'مكتملة' : 'قيد الانتظار';
+        const statusClass = tx.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
 
-    document.getElementById('main-devices-count').textContent = activeProductsCount; 
-    document.getElementById('main-total-revenue').textContent = formatCurrency(grandTotalRevenue);
-    
-    document.getElementById('shop-my-devices-count').textContent = activeProductsCount;
-    document.getElementById('shop-total-revenue').textContent = formatCurrency(totalRevenueFromProducts);
-    
-    // تحديث حالة الحضور اليومي
-    // updateDailyStatus();
-    // تحديث حالة عجلة الحظ
-    // updateWheelUI();
-    
-    // تحديث بيانات الفريق
-    // updateTeamUI();
-    
-    // إظهار زر الإدمن
-    const adminNavBtn = document.getElementById('nav-admin');
-    if (currentUser.isAdmin) {
-        adminNavBtn.classList.remove('hidden');
-    } else {
-        adminNavBtn.classList.add('hidden');
-    }
-}
-
-// دالة تحديث المنتجات الخاصة بي (تحتاج إلى بيانات myProducts من السيرفر)
-const oneDay = 86400000;
-function updateMyProductsUI() {
-    if (!currentUser) return;
-    
-    const listContainer = document.getElementById('my-products-list');
-    const noProductsMsg = document.getElementById('no-products-message');
-    let productCardsHTML = '';
-    
-    if ((currentUser.myProducts || []).length === 0) {
-         noProductsMsg.classList.remove('hidden');
-         listContainer.innerHTML = '';
-         document.getElementById('total-daily-earn').textContent = formatCurrency(0);
-         return;
-    } else {
-         noProductsMsg.classList.add('hidden');
-    }
-    
-    // 🚨 ملاحظة: هذا الكود سيعمل فقط إذا كانت البيانات المُعادَة من السيرفر مُنظمة بنفس طريقة Firebase 🚨
-    // في هذه المرحلة سنعتمد على أن السيرفر يُعيد منتجات مُحَسّبة.
-    let totalDailyEarn = 0;
-    const now = Date.now();
-
-    currentUser.myProducts.forEach(prod => {
-        const elapsedDays = Math.floor((now - prod.purchasedAt) / oneDay);
-        const remainingDays = prod.durationDays - elapsedDays;
-        
-        // حساب الأرباح المتاحة
-        const availableRevenueCycles = Math.floor((now - (prod.lastRevenueCollection || prod.purchasedAt)) / oneDay);
-        const availableRevenue = availableRevenueCycles * prod.dailyEarning;
-        
-        const totalRevenue = prod.dailyEarning * prod.durationDays;
-        const progressPercent = (elapsedDays / prod.durationDays) * 100;
-        
-        totalDailyEarn += prod.dailyEarning;
-
-        productCardsHTML += `
-            <div class="my-product-card" data-id="${prod.id}">
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="text-xl font-black text-gray-800">${prod.name}</h4>
-                    <span class="text-sm font-bold text-gray-500">الأيام المتبقية: ${Math.max(0, remainingDays)}</span>
-                </div>
-                <button onclick="collectRevenue(${prod.id})">جمع الأرباح</button>
-            </div>
+        const row = document.createElement('tr');
+        row.className = 'border-b hover:bg-gray-50';
+        row.innerHTML = `
+            <td class="py-3 px-4 font-semibold">${tx.name}</td>
+            <td class="py-3 px-4 ${amountClass}">${sign}${tx.amount.toFixed(2)} ج.م</td>
+            <td class="py-3 px-4 text-sm">${tx.date.split(',')[0]}</td>
+            <td class="py-3 px-4 text-center">
+                <span class="inline-block px-3 py-1 text-xs rounded-full ${statusClass}">
+                    ${statusText}
+                </span>
+            </td>
         `;
+        tableBody.appendChild(row);
     });
-    
-     listContainer.innerHTML = productCardsHTML;
-     document.getElementById('total-daily-earn').textContent = formatCurrency(totalDailyEarn);
 }
 
-// دالة تحديث سجلات العمليات (تحتاج إلى بيانات transactions من السيرفر)
-function updateTransactionsUI() {
-     const container = document.getElementById('transaction-records');
-     const noRecordsMsg = document.getElementById('no-records-message');
-     
-     if (!currentUser || (currentUser.transactions || []).length === 0) {
-         container.innerHTML = '';
-         noRecordsMsg.classList.remove('hidden');
-         return;
-     }
-     
-     noRecordsMsg.classList.add('hidden');
-     const lastTen = currentUser.transactions.slice().reverse().slice(0, 10);
-     
-     container.innerHTML = lastTen.map(t => {
-         const isPositive = t.amount > 0;
-         const isPending = t.type.includes('طلب');
-
-         let amountDisplay = t.amount > 0 ? '+' : '';
-         amountDisplay += formatCurrency(Math.abs(t.amount));
-         
-         let colorClass = isPositive ? 'text-green-600' : 'text-red-600';
-         if (isPending) colorClass = 'text-yellow-600';
-
-         let detailText = t.name ? `(${t.name})` : '';
-         if (isPending) detailText = `(${t.name.includes('رقم') ? t.name : formatCurrency(Math.abs(t.amount))})`;
-
-
-         return `
-             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 ${isPending ? 'border-yellow-400' : ''}">
-                 <div>
-                     <p class="font-bold text-sm">${t.type} <span class="text-gray-500">${detailText}</span></p>
-                     <p class="text-xs text-gray-500">${t.date}</p>
-                 </div>
-                 <span class="font-black text-base ${colorClass}">
-                    ${isPending ? 'قيد المراجعة' : amountDisplay}
-                 </span>
-             </div>
-         `;
-     }).join('');
-}
-
-// دالة بناء بطاقة المنتج
 function makeProductCard(product, isHome = false) {
-    const totalRevenue = product.dailyEarning * product.durationDays;
-    const containerClass = isHome ? 'bg-white p-4 rounded-xl shadow-md flex items-center border border-gray-100' : 'bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100';
-    const imageStyle = isHome ? 'w-24 h-24 object-cover rounded-lg ml-4 flex-shrink-0' : 'w-full h-40 object-cover';
-    const buttonText = isHome ? 'شراء' : 'شراء الآن';
-    const buttonClass = isHome ? 'bg-yellow-500 text-black font-bold py-2 px-4 rounded-full mt-2 hover:bg-yellow-600 transition' : 'w-full bg-yellow-500 text-black font-bold py-3 hover:bg-yellow-600 transition duration-200 text-lg';
+    const actionButton = isHome ? 
+        `<button class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl font-bold transition-colors" onclick="showTab('shop')">
+            <i data-lucide="shopping-cart" class="w-5 h-5 inline-block ml-2"></i> شاهد جميع المنتجات
+        </button>`
+        :
+        `<button class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition-colors" onclick="userInvest(${product.id})">
+            <i data-lucide="trending-up" class="w-5 h-5 inline-block ml-2"></i> استثمر الآن
+        </button>`;
 
     return `
-        <div class="product-card ${containerClass}">
-            ${isHome ? `<img src="${product.img}" alt="${product.name}" class="${imageStyle}">` : `<img src="${product.img}" alt="${product.name}" class="${imageStyle}">`}
-            <div class="${isHome ? 'flex-grow' : 'p-4'}">
-                <h3 class="text-lg font-extrabold text-gray-800 mb-1">${product.name}</h3>
-                <div class="space-y-1 text-xs text-gray-600">
-                    <p>السعر: <b class="text-yellow-600">${formatCurrency(product.cost)}</b></p>
-                    <p>الدخل اليومي: <b class="text-green-600">${formatCurrency(product.dailyEarning)}</b></p>
-                    <p>إجمالي الدخل: <b class="text-indigo-600">${formatCurrency(totalRevenue)}</b></p>
-                    <p>مدة العقد: <b>${product.durationDays} يوم</b></p>
+        <div class="product-card bg-white p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col justify-between">
+            <div>
+                <img src="${product.img}" alt="${product.name}" class="w-full h-auto rounded-xl mb-4 object-cover">
+                <h3 class="text-xl font-black text-gray-900">${product.name}</h3>
+                <p class="text-gray-500 text-sm mt-1">مدة العقد: ${product.durationDays} يوم</p>
+                <div class="mt-3 flex flex-col gap-2">
+                    <div class="flex items-center justify-between text-lg font-bold text-gray-700">
+                        <span>قيمة الاستثمار:</span>
+                        <span class="text-yellow-600">${product.cost.toFixed(2)} ج.م</span>
+                    </div>
+                    <div class="flex items-center justify-between text-lg font-bold text-gray-700 border-t pt-2">
+                        <span>الربح اليومي:</span>
+                        <span class="text-green-600">${product.dailyEarning.toFixed(2)} ج.م</span>
+                    </div>
                 </div>
-                 <button class="${buttonClass}" onclick="buyProduct(${product.id})">
-                    ${buttonText}
-                </button>
             </div>
+            ${actionButton}
         </div>
     `;
 }
 
-// ******************** 5. التمهيد (Initialization) ********************
-        
-function initApp() {
+// ******************************************************
+// 5. وظائف التحكم في الواجهة (UI Controls)
+// ******************************************************
+
+function showTab(tabId, element) {
+    // إخفاء جميع التبويبات
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    // إظهار التبويب المطلوب
+    document.getElementById(tabId).classList.add('active');
+    
+    // إزالة حالة التفعيل من جميع أزرار التنقل
+    document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.remove('active-tab'));
+    
+    // تفعيل الزر الحالي
+    if (element) {
+        element.classList.add('active-tab');
+    }
+    
+    // تحديث أيقونات lucide
     lucide.createIcons();
+}
+
+function openModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+    // لضمان عمل animation
+    setTimeout(() => {
+        document.getElementById(modalId).classList.add('opacity-100');
+    }, 10);
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('opacity-100');
+    // لضمان عمل animation
+    setTimeout(() => {
+        document.getElementById(modalId).classList.add('hidden');
+    }, 300);
+}
+
+
+// ******************************************************
+// 6. تهيئة التطبيق (Initialization)
+// ******************************************************
+
+function initApp() {
+    // ربط الدوال بأزرار Modal
+    document.getElementById('deposit-submit-btn').onclick = submitDeposit;
+    document.getElementById('withdraw-submit-btn').onclick = submitWithdraw;
+    document.getElementById('deposit-open-btn').onclick = () => openModal('deposit-modal');
+    document.getElementById('withdraw-open-btn').onclick = () => openModal('withdraw-modal');
+    document.getElementById('logout-btn').onclick = userLogout;
+    
+    // ربط إغلاق الـ Modal بالخلفية
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.onclick = (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal(overlay.id);
+            }
+        };
+    });
     
     // عرض المنتجات في المتجر والصفحة الرئيسية
     const shopContainer = document.getElementById("products-grid");
